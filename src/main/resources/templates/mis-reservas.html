@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Biblioteca USIL - Mis reservas</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+        body { display: flex; background-color: #f8fafc; color: #1e293b; min-height: 100vh; }
+        
+        /* Sidebar Navigation */
+        .sidebar { width: 250px; background-color: #002B49; color: white; padding: 30px 20px; display: flex; flex-direction: column; justify-content: space-between; flex-shrink: 0; }
+        
+        .logo-container { text-align: center; margin-bottom: 35px; display: flex; flex-direction: column; align-items: center; }
+        .usil-img-logo { width: 110px; height: auto; display: block; margin: 0 auto 10px auto; object-fit: contain; }
+        .brand-title { font-size: 19px; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; margin-top: 4px; }
+        .brand-tagline { font-size: 11px; color: #94a3b8; font-weight: 300; margin-top: 4px; line-height: 1.3; font-style: italic; }
+        
+        .nav-menu { list-style: none; width: 100%; }
+        .nav-item { margin-bottom: 8px; }
+        .nav-link { display: flex; align-items: center; padding: 12px 15px; color: #c2d1e0; text-decoration: none; border-radius: 8px; font-size: 14px; transition: 0.3s; }
+        .nav-link:hover, .nav-link.active { background-color: #0e4c75; color: white; font-weight: 600; }
+        .nav-link i { margin-right: 12px; font-size: 16px; width: 20px; text-align: center; }
+        
+        .logout { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; }
+        .btn-logout-demo { color: #c2d1e0; text-decoration: none; display: flex; align-items: center; font-size: 14px; background: none; border: none; cursor: pointer; width: 100%; text-align: left; padding: 8px 0; }
+
+        /* Main Content Area */
+        .main-content { flex: 1; padding: 30px 40px; overflow-y: auto; }
+        
+        /* Header Top */
+        .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
+        .page-title h1 { font-size: 28px; font-weight: 800; color: #002B49; margin-bottom: 4px; }
+        .page-title p { font-size: 14px; color: #64748b; }
+        
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .view-badge { background: #e0f2fe; color: #0284c7; padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+        
+        .user-profile { display: flex; align-items: center; background: white; padding: 6px 14px; border-radius: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; margin-right: 10px; color: #475569; }
+        .user-info { font-size: 12px; }
+        .user-name { font-weight: 700; color: #1e293b; }
+        .user-role { color: #64748b; font-size: 11px; }
+
+        /* Filter Controls Card */
+        .filters-card { background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .filters-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 15px; align-items: end; }
+        
+        .filter-group label { display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px; }
+        .filter-input-wrap { position: relative; }
+        .filter-input-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px; }
+        
+        .filter-control { width: 100%; padding: 10px 12px 10px 36px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; background: white; color: #334155; }
+        .filter-select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; background: white; color: #334155; cursor: pointer; }
+        
+        .btn-clear-filters { background: white; border: 1px solid #0099a8; color: #0099a8; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .btn-clear-filters:hover { background: #e6f7f8; }
+
+        /* Reservations Table */
+        .table-container { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .reservations-table { width: 100%; border-collapse: collapse; text-align: left; }
+        
+        .reservations-table th { background: #f0f7ff; color: #0f172a; font-size: 12px; font-weight: 700; padding: 14px 20px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+        .reservations-table td { padding: 18px 20px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #334155; vertical-align: middle; }
+        .reservations-table tr:last-child td { border-bottom: none; }
+        
+        .col-code { font-weight: 700; color: #475569; }
+        .book-info-title { font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+        .book-info-author { font-size: 12px; color: #64748b; }
+        
+        .date-sub { font-size: 11px; color: #94a3b8; }
+
+        /* Status Badges */
+        .badge-status { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; text-align: center; }
+        .badge-aprobada { background-color: #d1fae5; color: #059669; }
+        .badge-pendiente { background-color: #fef3c7; color: #d97706; }
+        .badge-cancelada { background-color: #f1f5f9; color: #64748b; }
+        .badge-rechazada { background-color: #ffe4e6; color: #e11d48; }
+
+        /* Actions Column */
+        .actions-cell { display: flex; gap: 8px; align-items: center; }
+        .btn-action-outline { border: 1px solid #0099a8; background: white; color: #0099a8; padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-action-outline:hover { background: #e6f7f8; }
+        
+        .btn-action-danger { border: 1px solid #f87171; background: white; color: #ef4444; padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-action-danger:hover { background: #fef2f2; }
+
+        .empty-table { text-align: center; padding: 50px 20px; color: #64748b; }
+        .empty-table i { font-size: 40px; color: #cbd5e1; margin-bottom: 12px; display: block; }
+
+        /* Modal Overlay */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
+        .modal-card { background: white; border-radius: 16px; width: 440px; padding: 30px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .modal-icon-danger { width: 60px; height: 60px; border-radius: 50%; background: #ffe4e6; color: #e11d48; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 15px auto; }
+        
+        .modal-title { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+        .modal-desc { font-size: 13px; color: #64748b; margin-bottom: 25px; line-height: 1.5; }
+        
+        .modal-buttons { display: flex; gap: 12px; }
+        .btn-modal-no { flex: 1; padding: 11px; border: 1px solid #cbd5e1; background: white; color: #475569; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
+        .btn-modal-yes-danger { flex: 1; padding: 11px; border: none; background: #ef4444; color: white; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
+        .btn-modal-yes-danger:hover { background: #dc2626; }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div>
+            <div class="logo-container">
+                <img th:src="@{/images/logo-usil.png}" src="/images/logo-usil.png" alt="Logo USIL" class="usil-img-logo">
+                <div class="brand-title">Biblioteca USIL</div>
+                <div class="brand-tagline">Conocimiento que impulsa tu futuro</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/buscar-libros" class="nav-link"><i class="fa-solid fa-house"></i> Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/buscar-libros" class="nav-link"><i class="fa-solid fa-magnifying-glass"></i> Buscar libros</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/mis-reservas" class="nav-link active"><i class="fa-regular fa-calendar"></i> Mis reservas</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/mis-reservas" class="nav-link"><i class="fa-regular fa-clock"></i> Mi historial</a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="logout">
+            <button type="button" class="btn-logout-demo" onclick="event.preventDefault();">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Cerrar sesión
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        
+        <!-- Header Top -->
+        <div class="header-top">
+            <div class="page-title">
+                <h1>Mis reservas</h1>
+                <p>Consulta y gestiona tus reservas de libros.</p>
+            </div>
+            
+            <div class="header-right">
+                <div class="view-badge">Vista: Estudiante</div>
+                
+                <div class="user-profile">
+                    <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+                    <div class="user-info">
+                        <div class="user-name" th:text="${usuario != null && usuario.nombreCompleto != null ? usuario.nombreCompleto : 'Stefany Vicente'}">Stefany Vicente</div>
+                        <div class="user-role">Estudiante</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Controls Card -->
+        <div class="filters-card">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <div class="filter-input-wrap">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="searchInput" class="filter-control" placeholder="Buscar por título o código de reserva..." onkeyup="filterTable()">
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label>Estado</label>
+                    <select id="statusSelect" class="filter-select" onchange="filterTable()">
+                        <option value="Todos">Todos</option>
+                        <option value="Aprobada">Aprobada</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Cancelada">Cancelada</option>
+                        <option value="Rechazada">Rechazada</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Fecha desde</label>
+                    <input type="date" class="filter-select">
+                </div>
+
+                <div class="filter-group">
+                    <label>Fecha hasta</label>
+                    <input type="date" class="filter-select">
+                </div>
+
+                <button type="button" class="btn-clear-filters" onclick="resetFilters()">Limpiar filtros</button>
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-container">
+            <table class="reservations-table" id="reservasTable">
+                <thead>
+                    <tr>
+                        <th>Código de reserva</th>
+                        <th>Libro</th>
+                        <th>Fecha de solicitud <i class="fa-solid fa-arrow-down" style="font-size: 10px;"></i></th>
+                        <th>Fecha de recogida <i class="fa-solid fa-arrow-down" style="font-size: 10px;"></i></th>
+                        <th>Estado <i class="fa-solid fa-arrow-down" style="font-size: 10px;"></i></th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(reservas)}">
+                        <td colspan="6" class="empty-table">
+                            <i class="fa-regular fa-bookmark"></i>
+                            <h3>No se encontraron reservas registradas</h3>
+                            <p style="font-size: 12px; margin-top: 4px;">Explora el catálogo para realizar tu primera reserva.</p>
+                        </td>
+                    </tr>
+
+                    <tr th:each="r : ${reservas}">
+                        <td class="col-code" th:text="'R-2026-000' + ${r.idReserva}">R-2026-0010</td>
+                        <td>
+                            <div class="book-info-title" th:text="${r.idLibro == 1 ? 'Clean Code' : (r.idLibro == 2 ? 'Diseño de Sistemas' : (r.idLibro == 3 ? 'Base de datos: Conceptos' : 'Interacción Humano-Computador'))}">Clean Code</div>
+                            <div class="book-info-author" th:text="${r.idLibro == 1 ? 'Robert C. Martin' : (r.idLibro == 2 ? 'Ian Sommerville' : (r.idLibro == 3 ? 'Silberschatz et al.' : 'Alan Dix et al.'))}">Robert C. Martin</div>
+                        </td>
+                        <td>
+                            <div>08/11/2026</div>
+                            <div class="date-sub">11:30</div>
+                        </td>
+                        <td th:text="${r.fechaRecogida}">13/11/2026</td>
+                        <td>
+                            <span th:class="'badge-status ' + (${r.estadoReserva == 'Aprobada' ? 'badge-aprobada' : (r.estadoReserva == 'Pendiente' ? 'badge-pendiente' : (r.estadoReserva == 'Cancelada' ? 'badge-cancelada' : 'badge-rechazada'))})"
+                                  th:text="${r.estadoReserva}">Aprobada</span>
+                        </td>
+                        <td>
+                            <div class="actions-cell">
+                                <!-- Botón Cancelar (Abre Modal de confirmación) -->
+                                <button type="button" 
+                                        th:if="${r.estadoReserva == 'Aprobada' || r.estadoReserva == 'Pendiente'}" 
+                                        class="btn-action-danger" 
+                                        th:onclick="'openCancelModal(' + ${r.idReserva} + ')'">
+                                    <i class="fa-solid fa-hourglass"></i> Cancelar reserva
+                                </button>
+
+                                <a href="#" class="btn-action-outline">Ver detalles</a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- Modal de Confirmación de Cancelación -->
+    <div id="cancelModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-icon-danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="modal-title">¿Está seguro de cancelar esta reserva?</div>
+            <div class="modal-desc">
+                Esta acción actualizará el estado de la reserva a <strong>Cancelada</strong> en la base de datos y liberará la disponibilidad del libro.
+            </div>
+            
+            <form id="cancelForm" th:action="@{/cancelar-reserva}" method="post">
+                <input type="hidden" name="idReserva" id="modalReservaId">
+                <div class="modal-buttons">
+                    <button type="button" class="btn-modal-no" onclick="closeCancelModal()">No, mantener</button>
+                    <button type="submit" class="btn-modal-yes-danger">Sí, cancelar reserva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openCancelModal(reservaId) {
+            document.getElementById('modalReservaId').value = reservaId;
+            document.getElementById('cancelModal').style.display = 'flex';
+        }
+
+        function closeCancelModal() {
+            document.getElementById('cancelModal').style.display = 'none';
+        }
+
+        function filterTable() {
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            const statusVal = document.getElementById('statusSelect').value;
+            const table = document.getElementById('reservasTable');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (row.getElementsByTagName('td').length < 6) continue;
+
+                const codeText = row.getElementsByTagName('td')[0].innerText.toLowerCase();
+                const bookText = row.getElementsByTagName('td')[1].innerText.toLowerCase();
+                const statusText = row.getElementsByTagName('td')[4].innerText;
+
+                const matchesSearch = codeText.includes(searchVal) || bookText.includes(searchVal);
+                const matchesStatus = (statusVal === 'Todos') || (statusText === statusVal);
+
+                if (matchesSearch && matchesStatus) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusSelect').value = 'Todos';
+            filterTable();
+        }
+    </script>
+
+</body>
+</html>

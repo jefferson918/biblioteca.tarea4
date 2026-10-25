@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Biblioteca USIL - Reservar libro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+        body { display: flex; background-color: #f4f7fc; color: #333; min-height: 100vh; }
+        
+        .sidebar { width: 260px; background-color: #002B49; color: white; padding: 30px 20px; display: flex; flex-direction: column; justify-content: space-between; flex-shrink: 0; }
+        .logo-container { text-align: center; margin-bottom: 35px; display: flex; flex-direction: column; align-items: center; }
+        .usil-img-logo { width: 120px; height: auto; display: block; margin: 0 auto 10px auto; object-fit: contain; }
+        .brand-title { font-size: 20px; font-weight: 600; color: #ffffff; letter-spacing: 0.5px; margin-top: 4px; }
+        .brand-tagline { font-size: 11px; color: #94a3b8; font-weight: 300; margin-top: 4px; line-height: 1.3; font-style: italic; }
+        
+        .nav-menu { list-style: none; width: 100%; }
+        .nav-item { margin-bottom: 8px; }
+        .nav-link { display: flex; align-items: center; padding: 12px 15px; color: #c2d1e0; text-decoration: none; border-radius: 8px; font-size: 14px; transition: 0.3s; }
+        .nav-link:hover, .nav-link.active { background-color: #0e4c75; color: white; font-weight: 500; }
+        .nav-link i { margin-right: 12px; font-size: 16px; width: 20px; text-align: center; }
+        
+        .logout { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; }
+        .btn-logout-demo { color: #c2d1e0; text-decoration: none; display: flex; align-items: center; font-size: 14px; background: none; border: none; cursor: pointer; width: 100%; text-align: left; padding: 8px 0; }
+
+        .main-content { flex: 1; padding: 30px 40px; overflow-y: auto; }
+        
+        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 13px; color: #64748b; }
+        .breadcrumb { display: flex; align-items: center; gap: 8px; }
+        .breadcrumb a { color: #64748b; text-decoration: none; }
+        .breadcrumb a:hover { color: #0099a8; }
+        .breadcrumb-active { color: #1e293b; font-weight: 600; }
+
+        .user-profile { display: flex; align-items: center; background: white; padding: 6px 14px; border-radius: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; margin-right: 10px; color: #475569; }
+        .user-info { font-size: 12px; }
+        .user-name { font-weight: 600; color: #1e293b; }
+        .user-role { color: #64748b; font-size: 10px; }
+
+        .page-header { margin-bottom: 25px; }
+        .page-header h1 { font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+        .page-header p { font-size: 13px; color: #64748b; }
+
+        .reservation-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 25px; }
+
+        .book-details-card { background: white; border-radius: 12px; padding: 25px; border: 1px solid #e2e8f0; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: #0099a8; text-decoration: none; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+        
+        .book-main-info { display: flex; gap: 20px; margin-bottom: 25px; }
+        .book-cover { width: 140px; height: 200px; border-radius: 8px; object-fit: contain; background: #f8fafc; border: 1px solid #e2e8f0; }
+        .book-meta { flex: 1; }
+        
+        .badge-available { display: inline-block; background-color: #dcfce7; color: #15803d; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-bottom: 10px; }
+        .book-title-detail { font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+        .book-subtitle { font-size: 13px; color: #64748b; margin-bottom: 15px; }
+
+        .specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 15px; font-size: 12px; }
+        .spec-item { display: flex; align-items: center; gap: 8px; color: #64748b; }
+        .spec-item i { width: 16px; color: #94a3b8; }
+        .spec-val { color: #1e293b; font-weight: 600; margin-left: auto; }
+
+        .book-description { border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 20px; }
+        .book-description h3 { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+        .book-description p { font-size: 13px; color: #64748b; line-height: 1.6; }
+
+        .form-card { background: white; border-radius: 12px; padding: 25px; border: 1px solid #e2e8f0; }
+        .form-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .form-header-icon { width: 40px; height: 40px; border-radius: 10px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .form-header-text h3 { font-size: 16px; font-weight: 700; color: #0f172a; }
+        .form-header-text p { font-size: 12px; color: #64748b; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 6px; }
+        .input-wrap { position: relative; }
+        .input-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px; }
+        .form-control { width: 100%; padding: 10px 12px 10px 36px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; background: #f8fafc; color: #475569; }
+        .form-select { width: 100%; padding: 10px 12px 10px 36px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; background: white; color: #1e293b; cursor: pointer; }
+
+        .alert-status { padding: 12px; border-radius: 8px; font-size: 12px; display: none; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .alert-danger { background-color: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+        .alert-success { background-color: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+
+        .step-calendar-section { display: none; margin-top: 15px; }
+        .calendar-box { border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; background: #f8fafc; margin-bottom: 15px; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 700; font-size: 13px; color: #1e293b; }
+        .calendar-nav { background: none; border: none; cursor: pointer; color: #64748b; font-size: 12px; }
+        
+        .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 4px; font-size: 11px; }
+        .day-name { font-weight: 600; color: #94a3b8; padding-bottom: 6px; }
+        .day-num { padding: 8px 0; border-radius: 6px; color: #334155; cursor: pointer; transition: 0.2s; }
+        .day-num:hover { background: #e2e8f0; }
+        .day-num.selected { background: #0099a8; color: white; font-weight: 700; }
+        .day-num.disabled { color: #cbd5e1; cursor: not-allowed; }
+
+        .summary-box { background: #f8fafc; border-radius: 8px; padding: 15px; border: 1px dashed #cbd5e1; margin-bottom: 20px; }
+        .summary-title { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .summary-item { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; }
+        .summary-label { color: #64748b; }
+        .summary-val { color: #1e293b; font-weight: 600; text-align: right; }
+
+        .form-actions { display: flex; gap: 12px; margin-bottom: 15px; }
+        .btn-cancel { flex: 1; padding: 12px; border: 1px solid #cbd5e1; background: white; color: #475569; border-radius: 8px; font-weight: 600; text-align: center; text-decoration: none; font-size: 13px; }
+        .btn-confirm { flex: 1; padding: 12px; border: none; background: #0099a8; color: white; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
+        .btn-confirm:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
+        .modal-card { background: white; border-radius: 16px; width: 440px; padding: 30px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .modal-icon-question { width: 60px; height: 60px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 15px auto; }
+        
+        .modal-title { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+        .modal-desc { font-size: 13px; color: #64748b; margin-bottom: 25px; line-height: 1.5; }
+        
+        .modal-buttons { display: flex; gap: 12px; }
+        .btn-modal-no { flex: 1; padding: 11px; border: 1px solid #cbd5e1; background: white; color: #475569; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
+        .btn-modal-yes { flex: 1; padding: 11px; border: none; background: #0099a8; color: white; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div>
+            <div class="logo-container">
+                <img th:src="@{/images/logo-usil.png}" src="/images/logo-usil.png" alt="Logo USIL" class="usil-img-logo">
+                <div class="brand-title">Biblioteca USIL</div>
+                <div class="brand-tagline">Conocimiento que impulsa tu futuro</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/buscar-libros" class="nav-link"><i class="fa-solid fa-house"></i> Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/buscar-libros" class="nav-link active"><i class="fa-solid fa-magnifying-glass"></i> Buscar libros</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/mis-reservas" class="nav-link"><i class="fa-regular fa-calendar"></i> Mis reservas</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/mis-reservas" class="nav-link"><i class="fa-regular fa-clock"></i> Mi historial</a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="logout">
+            <button type="button" class="btn-logout-demo" onclick="event.preventDefault();">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Cerrar sesión
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="top-nav">
+            <div class="breadcrumb">
+                <a href="/buscar-libros">Buscar libros</a>
+                <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
+                <a href="#">Detalles del libro</a>
+                <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
+                <span class="breadcrumb-active">Reservar libro</span>
+            </div>
+
+            <div class="user-profile">
+                <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+                <div class="user-info">
+                    <div class="user-name" th:text="${usuario != null && usuario.nombreCompleto != null ? usuario.nombreCompleto : 'Stefany Vicente'}">Stefany Vicente</div>
+                    <div class="user-role">Estudiante</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-header">
+            <h1>Reservar libro</h1>
+            <p>Selecciona primero la sede de recogida para verificar la disponibilidad en tiempo real.</p>
+        </div>
+
+        <div class="reservation-grid">
+            
+            <div class="book-details-card">
+                <a href="/buscar-libros" class="back-link"><i class="fa-solid fa-arrow-left"></i> Volver al catálogo</a>
+                
+                <div class="book-main-info">
+                    <img th:src="${libro != null && libro.idLibro == 1} ? @{/images/logo-libro1.jpg} : 
+                                 (${libro != null && libro.idLibro == 2} ? @{/images/logo-libro2.jpg} : 
+                                 (${libro != null && libro.idLibro == 3} ? @{/images/logo-libro3.jpg} : 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80'))" 
+                         src="/images/logo-libro1.jpg"
+                         alt="Portada" class="book-cover">
+                    
+                    <div class="book-meta">
+                        <span class="badge-available" th:text="${libro != null ? libro.estadoDisponibilidad : 'Disponible'}">Disponible</span>
+                        <h2 class="book-title-detail" id="lblBookTitle" th:text="${libro != null ? libro.titulo : 'Clean Code'}">Clean Code</h2>
+                        <div class="book-subtitle">A Handbook of Agile Software Craftsmanship</div>
+
+                        <div class="specs-grid">
+                            <div class="spec-item"><i class="fa-regular fa-user"></i> Autor</div>
+                            <div class="spec-val" th:text="${libro != null ? libro.autor : 'Robert C. Martin'}">Robert C. Martin</div>
+
+                            <div class="spec-item"><i class="fa-regular fa-folder"></i> Categoría</div>
+                            <div class="spec-val" th:text="${libro != null ? libro.categoria : 'Desarrollo de software'}">Desarrollo de software</div>
+
+                            <div class="spec-item"><i class="fa-solid fa-barcode"></i> Código</div>
+                            <div class="spec-val" th:text="${libro != null ? 'LIB-00' + libro.idLibro : 'SW001'}">SW001</div>
+
+                            <div class="spec-item"><i class="fa-regular fa-bookmark"></i> Editorial</div>
+                            <div class="spec-val" th:text="${libro != null ? libro.editorial : 'Prentice Hall'}">Prentice Hall</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="book-description">
+                    <h3>Descripción</h3>
+                    <p th:text="${libro != null ? libro.descripcion : 'Clean Code presenta un conjunto de buenas prácticas y principios para escribir código limpio, legible y mantenible.'}">Clean Code presenta un conjunto de buenas prácticas y principios para escribir código limpio, legible y mantenible.</p>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <div class="form-header">
+                    <div class="form-header-icon"><i class="fa-regular fa-calendar-check"></i></div>
+                    <div class="form-header-text">
+                        <h3>Información de la reserva</h3>
+                        <p>Completa los pasos para reservar este libro.</p>
+                    </div>
+                </div>
+
+                <!-- FORMULARIO CONECTADO A MYSQL -->
+                <form id="dbForm" th:action="@{/confirmar-reserva}" method="post">
+                    <input type="hidden" name="idLibro" th:value="${libro != null ? libro.idLibro : 1}">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Código institucional</label>
+                            <div class="input-wrap">
+                                <i class="fa-regular fa-id-card"></i>
+                                <input type="text" class="form-control" th:value="${usuario != null ? usuario.codigoInstitucional : '2022104567'}" readonly>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <div class="input-wrap">
+                                <i class="fa-regular fa-user"></i>
+                                <input type="text" class="form-control" th:value="${usuario != null ? usuario.nombreCompleto : 'Stefany Vicente'}" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Paso 1: Selecciona la sede de recogida</label>
+                        <div class="input-wrap">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <select name="sedeRecogida" id="selectSede" class="form-select" onchange="checkAvailabilityAndShowCalendar()">
+                                <option value="" disabled selected>-- Elige una sede --</option>
+                                <option value="Biblioteca Sede A (Campus Belaunde)">Biblioteca Sede A (Campus Belaunde)</option>
+                                <option value="Biblioteca Sede B (Campus Grau)">Biblioteca Sede B (Campus Grau)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="alertOcupado" class="alert-status alert-danger">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span>El libro se encuentra ocupado en esta sede. Intenta seleccionando otra sede.</span>
+                    </div>
+
+                    <div id="alertDisponible" class="alert-status alert-success">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Ejemplar disponible en esta sede. Selecciona la fecha de recogida abajo.</span>
+                    </div>
+
+                    <div id="calendarSection" class="step-calendar-section">
+                        <div class="form-group">
+                            <label>Paso 2: Selecciona la fecha de recogida</label>
+                            <div class="input-wrap">
+                                <i class="fa-regular fa-calendar"></i>
+                                <input type="text" id="fechaSelectedInput" name="fechaRecogida" class="form-control" value="18 de noviembre de 2026" readonly style="background: white; cursor: pointer;">
+                            </div>
+                        </div>
+
+                        <div class="calendar-box">
+                            <div class="calendar-header">
+                                <button type="button" class="calendar-nav"><i class="fa-solid fa-chevron-left"></i></button>
+                                <span>Noviembre 2026</span>
+                                <button type="button" class="calendar-nav"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                            <div class="calendar-days">
+                                <div class="day-name">Lu</div><div class="day-name">Ma</div><div class="day-name">Mi</div>
+                                <div class="day-name">Ju</div><div class="day-name">Vi</div><div class="day-name">Sá</div><div class="day-name">Do</div>
+                                
+                                <div class="day-num disabled">26</div><div class="day-num disabled">27</div><div class="day-num disabled">28</div>
+                                <div class="day-num disabled">29</div><div class="day-num disabled">30</div><div class="day-num disabled">31</div><div class="day-num">1</div>
+                                
+                                <div class="day-num">2</div><div class="day-num">3</div><div class="day-num">4</div><div class="day-num">5</div>
+                                <div class="day-num">6</div><div class="day-num">7</div><div class="day-num">8</div>
+                                
+                                <div class="day-num">9</div><div class="day-num">10</div><div class="day-num">11</div><div class="day-num">12</div>
+                                <div class="day-num">13</div><div class="day-num">14</div><div class="day-num">15</div>
+                                
+                                <div class="day-num">16</div><div class="day-num">17</div>
+                                <div class="day-num selected" onclick="selectDate(this, '18 de noviembre de 2026')">18</div>
+                                <div class="day-num" onclick="selectDate(this, '19 de noviembre de 2026')">19</div>
+                                <div class="day-num" onclick="selectDate(this, '20 de noviembre de 2026')">20</div>
+                                <div class="day-num">21</div><div class="day-num">22</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="summary-box">
+                        <div class="summary-title"><i class="fa-regular fa-clipboard"></i> Resumen de la reserva</div>
+                        <div class="summary-item">
+                            <span class="summary-label">Libro</span>
+                            <span class="summary-val" th:text="${libro != null ? libro.titulo : 'Clean Code'}">Clean Code</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Ubicación</span>
+                            <span class="summary-val" id="summarySede">Por seleccionar...</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Fecha de recogida</span>
+                            <span class="summary-val" id="summaryFecha">Por seleccionar...</span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="/buscar-libros" class="btn-cancel">Volver al catálogo</a>
+                        <button type="button" id="btnConfirmar" class="btn-confirm" disabled onclick="openModal()">Confirmar reserva <i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+
+                    <!-- Modal de Confirmación -->
+                    <div id="modalConfirmStep" class="modal-overlay">
+                        <div class="modal-card">
+                            <div class="modal-icon-question"><i class="fa-solid fa-circle-question"></i></div>
+                            <div class="modal-title">¿Está seguro de reservar este libro?</div>
+                            <div class="modal-desc">
+                                Estás a punto de registrar esta reserva en la base de datos para el <strong id="modalDateText">18 de noviembre de 2026</strong>.
+                            </div>
+                            <div class="modal-buttons">
+                                <button type="button" class="btn-modal-no" onclick="closeModal()">No, cancelar</button>
+                                <!-- Al hacer click en "Sí, reservar", se realiza el SUBMIT a Spring Boot/MySQL -->
+                                <button type="submit" class="btn-modal-yes">Sí, reservar</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        function checkAvailabilityAndShowCalendar() {
+            const select = document.getElementById('selectSede');
+            const alertOcupado = document.getElementById('alertOcupado');
+            const alertDisponible = document.getElementById('alertDisponible');
+            const calendarSection = document.getElementById('calendarSection');
+            const btnConfirmar = document.getElementById('btnConfirmar');
+            const summarySede = document.getElementById('summarySede');
+            const summaryFecha = document.getElementById('summaryFecha');
+
+            summarySede.innerText = select.value;
+            const isAvailable = Math.random() > 0.20;
+
+            if (!isAvailable) {
+                alertOcupado.style.display = 'flex';
+                alertDisponible.style.display = 'none';
+                calendarSection.style.display = 'none';
+                btnConfirmar.disabled = true;
+                summaryFecha.innerText = 'No disponible';
+            } else {
+                alertOcupado.style.display = 'none';
+                alertDisponible.style.display = 'flex';
+                calendarSection.style.display = 'block';
+                btnConfirmar.disabled = false;
+                summaryFecha.innerText = document.getElementById('fechaSelectedInput').value;
+            }
+        }
+
+        function selectDate(element, dateStr) {
+            document.querySelectorAll('.day-num').forEach(d => d.classList.remove('selected'));
+            element.classList.add('selected');
+            document.getElementById('fechaSelectedInput').value = dateStr;
+            document.getElementById('summaryFecha').innerText = dateStr;
+        }
+
+        function openModal() {
+            document.getElementById('modalDateText').innerText = document.getElementById('summaryFecha').innerText;
+            document.getElementById('modalConfirmStep').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modalConfirmStep').style.display = 'none';
+        }
+    </script>
+
+</body>
+</html>
