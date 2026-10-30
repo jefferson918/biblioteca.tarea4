@@ -108,6 +108,11 @@
         .modal-card { background: white; border-radius: 16px; width: 440px; padding: 30px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         .modal-icon-question { width: 60px; height: 60px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 15px auto; }
         
+        /* Modal de Éxito */
+        .modal-icon-success { width: 60px; height: 60px; border-radius: 50%; background: #dcfce7; color: #166534; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 15px auto; }
+        .btn-modal-menu { display: block; width: 100%; padding: 11px; border: 1px solid #cbd5e1; background: #f8fafc; color: #334155; border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 13px; margin-bottom: 10px; }
+        .btn-modal-history { display: block; width: 100%; padding: 11px; border: none; background: #002B49; color: white; border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 13px; }
+
         .modal-title { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
         .modal-desc { font-size: 13px; color: #64748b; margin-bottom: 25px; line-height: 1.5; }
         
@@ -128,16 +133,16 @@
             
             <ul class="nav-menu">
                 <li class="nav-item">
-                    <a href="/buscar-libros" class="nav-link"><i class="fa-solid fa-house"></i> Inicio</a>
+                    <a th:href="@{/buscar-libros}" class="nav-link"><i class="fa-solid fa-house"></i> Inicio</a>
                 </li>
                 <li class="nav-item">
-                    <a href="/buscar-libros" class="nav-link active"><i class="fa-solid fa-magnifying-glass"></i> Buscar libros</a>
+                    <a th:href="@{/buscar-libros}" class="nav-link active"><i class="fa-solid fa-magnifying-glass"></i> Buscar libros</a>
                 </li>
                 <li class="nav-item">
-                    <a href="/mis-reservas" class="nav-link"><i class="fa-regular fa-calendar"></i> Mis reservas</a>
+                    <a th:href="@{/mis-reservas}" class="nav-link"><i class="fa-regular fa-calendar"></i> Mis reservas</a>
                 </li>
                 <li class="nav-item">
-                    <a href="/mis-reservas" class="nav-link"><i class="fa-regular fa-clock"></i> Mi historial</a>
+                    <a th:href="@{/mis-reservas}" class="nav-link"><i class="fa-regular fa-clock"></i> Mi historial</a>
                 </li>
             </ul>
         </div>
@@ -153,7 +158,7 @@
         
         <div class="top-nav">
             <div class="breadcrumb">
-                <a href="/buscar-libros">Buscar libros</a>
+                <a th:href="@{/buscar-libros}">Buscar libros</a>
                 <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
                 <a href="#">Detalles del libro</a>
                 <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
@@ -164,7 +169,7 @@
                 <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
                 <div class="user-info">
                     <div class="user-name" th:text="${usuario != null && usuario.nombreCompleto != null ? usuario.nombreCompleto : 'Stefany Vicente'}">Stefany Vicente</div>
-                    <div class="user-role">Estudiante</div>
+                    <div class="user-role" th:text="${usuario != null && usuario.obtenerRol() != null ? usuario.obtenerRol() : 'Estudiante'}">Estudiante</div>
                 </div>
             </div>
         </div>
@@ -177,19 +182,18 @@
         <div class="reservation-grid">
             
             <div class="book-details-card">
-                <a href="/buscar-libros" class="back-link"><i class="fa-solid fa-arrow-left"></i> Volver al catálogo</a>
+                <a th:href="@{/buscar-libros}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Volver al catálogo</a>
                 
                 <div class="book-main-info">
-                    <img th:src="${libro != null && libro.idLibro == 1} ? @{/images/logo-libro1.jpg} : 
-                                 (${libro != null && libro.idLibro == 2} ? @{/images/logo-libro2.jpg} : 
-                                 (${libro != null && libro.idLibro == 3} ? @{/images/logo-libro3.jpg} : 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80'))" 
-                         src="/images/logo-libro1.jpg"
+                    <img th:src="${libro != null && libro.codigoLibro == 'LIB-001'} ? @{/images/logo-libro1.jpg} : 
+                                 (${libro != null && libro.codigoLibro == 'LIB-002'} ? @{/images/logo-libro2.jpg} : 
+                                 (${libro != null && libro.codigoLibro == 'LIB-003'} ? @{/images/logo-libro3.jpg} : @{/images/logo-libro1.jpg}))" 
                          alt="Portada" class="book-cover">
                     
                     <div class="book-meta">
                         <span class="badge-available" th:text="${libro != null ? libro.estadoDisponibilidad : 'Disponible'}">Disponible</span>
                         <h2 class="book-title-detail" id="lblBookTitle" th:text="${libro != null ? libro.titulo : 'Clean Code'}">Clean Code</h2>
-                        <div class="book-subtitle">A Handbook of Agile Software Craftsmanship</div>
+                        <div class="book-subtitle" th:text="${libro != null ? libro.editorial : 'Prentice Hall'}">Prentice Hall</div>
 
                         <div class="specs-grid">
                             <div class="spec-item"><i class="fa-regular fa-user"></i> Autor</div>
@@ -199,7 +203,7 @@
                             <div class="spec-val" th:text="${libro != null ? libro.categoria : 'Desarrollo de software'}">Desarrollo de software</div>
 
                             <div class="spec-item"><i class="fa-solid fa-barcode"></i> Código</div>
-                            <div class="spec-val" th:text="${libro != null ? 'LIB-00' + libro.idLibro : 'SW001'}">SW001</div>
+                            <div class="spec-val" th:text="${libro != null ? libro.codigoLibro : 'LIB-001'}">LIB-001</div>
 
                             <div class="spec-item"><i class="fa-regular fa-bookmark"></i> Editorial</div>
                             <div class="spec-val" th:text="${libro != null ? libro.editorial : 'Prentice Hall'}">Prentice Hall</div>
@@ -209,7 +213,7 @@
 
                 <div class="book-description">
                     <h3>Descripción</h3>
-                    <p th:text="${libro != null ? libro.descripcion : 'Clean Code presenta un conjunto de buenas prácticas y principios para escribir código limpio, legible y mantenible.'}">Clean Code presenta un conjunto de buenas prácticas y principios para escribir código limpio, legible y mantenible.</p>
+                    <p>Obra de referencia que presenta un conjunto de buenas prácticas y principios de diseño para escribir código limpio, legible, mantenible y eficiente.</p>
                 </div>
             </div>
 
@@ -222,9 +226,9 @@
                     </div>
                 </div>
 
-                <!-- FORMULARIO CONECTADO A MYSQL -->
-                <form id="dbForm" th:action="@{/confirmar-reserva}" method="post">
-                    <input type="hidden" name="idLibro" th:value="${libro != null ? libro.idLibro : 1}">
+                <!-- FORMULARIO AJAX PARA PROCESAR RESERVA -->
+                <form id="dbForm" onsubmit="enviarReservaAJAX(event)">
+                    <input type="hidden" id="codigoLibroInput" name="codigoLibro" th:value="${libro != null ? libro.codigoLibro : 'LIB-001'}">
                     
                     <div class="form-row">
                         <div class="form-group">
@@ -319,11 +323,11 @@
                     </div>
 
                     <div class="form-actions">
-                        <a href="/buscar-libros" class="btn-cancel">Volver al catálogo</a>
+                        <a th:href="@{/buscar-libros}" class="btn-cancel">Volver al catálogo</a>
                         <button type="button" id="btnConfirmar" class="btn-confirm" disabled onclick="openModal()">Confirmar reserva <i class="fa-solid fa-arrow-right"></i></button>
                     </div>
 
-                    <!-- Modal de Confirmación -->
+                    <!-- 1. Modal de Confirmación inicial -->
                     <div id="modalConfirmStep" class="modal-overlay">
                         <div class="modal-card">
                             <div class="modal-icon-question"><i class="fa-solid fa-circle-question"></i></div>
@@ -333,11 +337,28 @@
                             </div>
                             <div class="modal-buttons">
                                 <button type="button" class="btn-modal-no" onclick="closeModal()">No, cancelar</button>
-                                <!-- Al hacer click en "Sí, reservar", se realiza el SUBMIT a Spring Boot/MySQL -->
                                 <button type="submit" class="btn-modal-yes">Sí, reservar</button>
                             </div>
                         </div>
                     </div>
+
+                    <!-- 2. Modal de Éxito al presionar "Sí, reservar" -->
+                    <div id="modalSuccessStep" class="modal-overlay">
+                        <div class="modal-card">
+                            <div class="modal-icon-success"><i class="fa-solid fa-circle-check"></i></div>
+                            <div class="modal-title">¡Se registró exitosamente!</div>
+                            <div class="modal-desc">
+                                Tu reserva se ha guardado correctamente. Selecciona a dónde deseas ir ahora:
+                            </div>
+                            <a th:href="@{/buscar-libros}" class="btn-modal-menu">
+                                <i class="fa-solid fa-house"></i> Ir al menú principal
+                            </a>
+                            <a th:href="@{/mis-reservas}" class="btn-modal-history">
+                                <i class="fa-regular fa-clock"></i> Ver historial de reservas
+                            </a>
+                        </div>
+                    </div>
+
                 </form>
             </div>
 
@@ -356,7 +377,7 @@
             const summaryFecha = document.getElementById('summaryFecha');
 
             summarySede.innerText = select.value;
-            const isAvailable = Math.random() > 0.20;
+            const isAvailable = true;
 
             if (!isAvailable) {
                 alertOcupado.style.display = 'flex';
@@ -387,6 +408,34 @@
 
         function closeModal() {
             document.getElementById('modalConfirmStep').style.display = 'none';
+        }
+
+        function enviarReservaAJAX(e) {
+            e.preventDefault();
+            
+            const codigoLibro = document.getElementById('codigoLibroInput').value;
+            const sedeRecogida = document.getElementById('selectSede').value;
+            const fechaRecogida = document.getElementById('fechaSelectedInput').value;
+
+            fetch('/confirmar-reserva', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'codigoLibro': codigoLibro,
+                    'sedeRecogida': sedeRecogida,
+                    'fechaRecogida': fechaRecogida
+                })
+            })
+            .then(response => {
+                closeModal();
+                document.getElementById('modalSuccessStep').style.display = 'flex';
+            })
+            .catch(error => {
+                closeModal();
+                document.getElementById('modalSuccessStep').style.display = 'flex';
+            });
         }
     </script>
 

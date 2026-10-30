@@ -1,48 +1,73 @@
 package jar.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
 @Table(name = "reservas")
 public class Reserva {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_reserva")
-    private Long idReserva;
+    @Column(name = "codigo_reserva")
+    private String codigoReserva;
 
-    @Column(name = "id_usuario")
-    private Long idUsuario;
+    @ManyToOne
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private Usuario usuario;
 
-    @Column(name = "id_libro")
-    private Long idLibro;
+    @ManyToOne
+    @JoinColumn(name = "codigo_libro", nullable = false)
+    private Libro libro;
 
-    @Column(name = "sede_recogida")
-    private String sedeRecogida;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "fecha_solicitud")
+    private Date fechaSolicitud;
 
+    @Temporal(TemporalType.DATE)
     @Column(name = "fecha_recogida")
-    private LocalDate fechaRecogida;
+    private Date fechaRecogida;
+
+    @Column(name = "ubicacion_recogida")
+    private String ubicacionRecogida;
 
     @Column(name = "estado_reserva")
     private String estadoReserva;
 
     public Reserva() {}
 
-    public Long getIdReserva() { return idReserva; }
-    public void setIdReserva(Long idReserva) { this.idReserva = idReserva; }
+    public boolean crearReserva() {
+        this.fechaSolicitud = new Date();
+        this.estadoReserva = "Pendiente";
+        return true;
+    }
 
-    public Long getIdUsuario() { return idUsuario; }
-    public void setIdUsuario(Long idUsuario) { this.idUsuario = idUsuario; }
+    public boolean cancelarReserva() {
+        this.estadoReserva = "Cancelada";
+        return true;
+    }
 
-    public Long getIdLibro() { return idLibro; }
-    public void setIdLibro(Long idLibro) { this.idLibro = idLibro; }
+    public void cambiarEstado(String estado) {
+        this.estadoReserva = estado;
+    }
 
-    public String getSedeRecogida() { return sedeRecogida; }
-    public void setSedeRecogida(String sedeRecogida) { this.sedeRecogida = sedeRecogida; }
+    // Getters y Setters
+    public String getCodigoReserva() { return codigoReserva; }
+    public void setCodigoReserva(String codigoReserva) { this.codigoReserva = codigoReserva; }
 
-    public LocalDate getFechaRecogida() { return fechaRecogida; }
-    public void setFechaRecogida(LocalDate fechaRecogida) { this.fechaRecogida = fechaRecogida; }
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+
+    public Libro getLibro() { return libro; }
+    public void setLibro(Libro libro) { this.libro = libro; }
+
+    public Date getFechaSolicitud() { return fechaSolicitud; }
+    public void setFechaSolicitud(Date fechaSolicitud) { this.fechaSolicitud = fechaSolicitud; }
+
+    public Date getFechaRecogida() { return fechaRecogida; }
+    public void setFechaRecogida(Date fechaRecogida) { this.fechaRecogida = fechaRecogida; }
+
+    public String getUbicacionRecogida() { return ubicacionRecogida; }
+    public void setUbicacionRecogida(String ubicacionRecogida) { this.ubicacionRecogida = ubicacionRecogida; }
 
     public String getEstadoReserva() { return estadoReserva; }
     public void setEstadoReserva(String estadoReserva) { this.estadoReserva = estadoReserva; }
